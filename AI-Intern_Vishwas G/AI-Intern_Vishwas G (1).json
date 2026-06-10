@@ -1,0 +1,266 @@
+{
+  "name": "AI-Intern_Vishwas G",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "6ee0b8a9-788c-400c-8999-fff944206781",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"topic\": \"artificial intelligence\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        0
+      ],
+      "id": "932bf390-6494-4ec9-aac3-38a3a7c0e4fd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional content writer, SEO specialist, and social media manager.\n\nTopic: {{$json.topic}}\n\nGenerate the following content:\n\n1. Five SEO-friendly blog titles.\n2. A detailed blog outline including:\n   - Introduction\n   - Main sections with subsections\n   - Conclusion\n3. A professional blog article between 800 and 1200 words.\n4. Three LinkedIn posts.\n5. Three Instagram captions.\n6. Three Twitter/X posts.\n7. Twenty relevant hashtags.\n\nOutput requirements:\n- Use plain text only.\n- Do not use Markdown formatting.\n- Do not use #, ##, **, --, tables, or code blocks.\n- Keep formatting clean and professional.\n- Avoid unnecessary explanations or preamble.\n- Use business-quality language.\n- Ensure all content is relevant to the topic.\n\nOutput format — use these exact section labels in this order:\n\nBLOG TITLES\nBLOG OUTLINE\nBLOG ARTICLE\nLINKEDIN POSTS\nINSTAGRAM CAPTIONS\nTWITTER/X POSTS\nHASHTAGS\n\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        -96
+      ],
+      "id": "96115ed7-c4cd-4bcd-8556-3e03f12b340a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        96
+      ],
+      "id": "60430f34-a5e0-42f5-a6be-f6cc728805d5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6LeZWT9OTLI5oSgZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "70a72320-0bda-4688-b749-2b14dfe041cf",
+              "leftValue": "={{$json.topic || ''}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        0
+      ],
+      "id": "63762f93-c2c1-4cce-ab0f-f53d4f115585",
+      "name": "If",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "1"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        736,
+        128
+      ],
+      "id": "56983a56-2fa2-4862-9a7e-35dbffb4a36a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "7478351149",
+        "text": "={{$json.message}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        -64
+      ],
+      "id": "21513292-5eb1-43ec-9f62-1266bc8c4415",
+      "name": "Send a text message",
+      "webhookId": "5ac039d4-a0eb-4e2a-8db6-bcb630f8c34c",
+      "credentials": {
+        "telegramApi": {
+          "id": "rFAZSEIxN1oXpaRi",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.output;\nconst chunkSize = 3500;\n\nconst chunks = [];\n\nfor (let i = 0; i < text.length; i += chunkSize) {\n  chunks.push({\n    json: {\n      message: text.substring(i, i + chunkSize)\n    }\n  });\n}\n\nreturn chunks;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        -80
+      ],
+      "id": "b0e7489d-634d-4169-887b-53ed0ed7091c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Please enter a valid topic."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        656,
+        272
+      ],
+      "id": "700897f0-a8f3-4db7-af7c-25ba74c600dd",
+      "name": "Stop and Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b713edb8-226f-4e59-8e25-f6dcddfd3d38",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e2a27f03a754c44fd91a83316a559a782bc0054b2db10506bbf3cb2e4183fa91"
+  },
+  "id": "ts6285Hrxf32z9Ct",
+  "tags": []
+}
